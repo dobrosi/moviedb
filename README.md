@@ -1,3 +1,4 @@
+[![build](https://github.com/dobrosi/moviedb/actions/workflows/maven.yml/badge.svg)](https://github.com/dobrosi/moviedb/actions/workflows/maven.yml)
 # Java developer test
 
 ## A.) Movie info service
