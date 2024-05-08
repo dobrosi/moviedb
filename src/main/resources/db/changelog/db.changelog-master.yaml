@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-search_pattern-table
+      author: dobrosi.andras
+      changes:
+        - createTable:
+            tableName: search_pattern
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: movie_title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: api
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false

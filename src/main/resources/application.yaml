@@ -1,0 +1,20 @@
+api.clients:
+  themoviedb:
+    key: '1ef873bea6c825884bef0a26016ec359'
+    baseUrl: https://api.themoviedb.org/3
+  omdbapi:
+    key: 'e7bd1fc7'
+    baseUrl: https://www.omdbapi.com
+spring:
+  application.name: moviedb
+  r2dbc.url: r2dbc:h2:file:///./${spring.application.name}
+  liquibase.url: jdbc:h2:file:./${spring.application.name}
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+server:
+  shutdown: graceful
+management:
+  endpoint.shutdown.enabled: true
+  endpoints.web.exposure.include: info,health,shutdown
