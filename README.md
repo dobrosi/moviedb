@@ -66,3 +66,8 @@ A list of all matching movies, with year + director.
 ```shell
 ./mvnw spring-boot:run
 ```
+
+## Docker
+```shell
+docker-compose up
+```
