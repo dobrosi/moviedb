@@ -9,10 +9,10 @@ spring:
   application.name: moviedb
   r2dbc.url: r2dbc:h2:file:///./${spring.application.name}
   liquibase.url: jdbc:h2:file:./${spring.application.name}
-#  data:
-#    redis:
-#      host: localhost
-#      port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
 server:
   shutdown: graceful
 management:
