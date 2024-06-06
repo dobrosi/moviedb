@@ -17,6 +17,7 @@ import org.testcontainers.utility.DockerImageName;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.System.setProperty;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,19 +37,19 @@ class MovieControllerIT {
     @ParameterizedTest
     @ValueSource(strings = {"themoviedb", "omdbapi"})
     public void test(String api) {
-        assertFalse(webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/movies/{movieTitle}")
-                    .queryParam("api", api)
-                    .build("Üvegtigris"))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult(MovieDto.class)
-                .getResponseBody()
-                .collectList()
-                .block()
+        assertFalse(Objects.requireNonNull(webTestClient
+                        .get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/movies/{movieTitle}")
+                                .queryParam("api", api)
+                                .build("Üvegtigris"))
+                        .exchange()
+                        .expectStatus()
+                        .isOk()
+                        .returnResult(MovieDto.class)
+                        .getResponseBody()
+                        .collectList()
+                        .block())
                 .isEmpty());
 
         searchPatternRepository
@@ -81,6 +82,7 @@ class MovieControllerIT {
         var redis = new RedisContainer(DockerImageName.parse("redis:latest"));
         redis.start();
 
+        setProperty("spring.cache.type", "redis");
         setProperty("spring.data.redis.host", redis.getHost());
         setProperty("spring.data.redis.port", redis.getMappedPort(6379).toString());
         return redis;

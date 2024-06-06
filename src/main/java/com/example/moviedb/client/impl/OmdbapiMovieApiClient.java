@@ -1,12 +1,10 @@
 package com.example.moviedb.client.impl;
 
 import com.example.moviedb.client.MovieApiClient;
-import com.example.moviedb.configuration.ApiProperties;
 import com.example.moviedb.dto.MovieDto;
 import com.example.moviedb.service.MovieWebClient;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,8 +13,8 @@ import java.util.Map;
 
 import static java.util.Arrays.stream;
 
-@Component
-public class OmdbapiMovieApiClient extends MovieApiClient<OmdbapiMovieApiClient.MoviesResponse> {
+@Service
+public class OmdbapiMovieApiClient implements MovieApiClient {
 
     private static final String API_ID = "omdbapi";
     private static final String URL = "/";
@@ -27,17 +25,17 @@ public class OmdbapiMovieApiClient extends MovieApiClient<OmdbapiMovieApiClient.
     public static class MoviesResponse extends ApiMoviesResponse<MoviesResponse.MovieItem> {
         public static class MovieItem extends ApiMovieItem {
             @JsonProperty("imdbID")
-            private String id;
+            public String id;
 
             @JsonProperty("Title")
-            private String title;
+            public String title;
 
             @JsonProperty("Year")
-            private String year;
+            public String year;
         }
 
         @JsonProperty("Search")
-        private MovieItem[] items;
+        public MovieItem[] items;
     }
 
     public record MovieDetailsResponse(
@@ -45,20 +43,14 @@ public class OmdbapiMovieApiClient extends MovieApiClient<OmdbapiMovieApiClient.
             String director
     ) {}
 
-    public OmdbapiMovieApiClient(
-            @Autowired ApiProperties apiProperties,
-            @Autowired MovieWebClient movieWebClient) {
-        super(apiProperties, movieWebClient);
-    }
-
     @Override
     public String getApiName() {
         return API_ID;
     }
 
     @Override
-    public Flux<MovieDto> getMovies(String movieTitle) {
-        return getMovies(URL, Map.of(SEARCH_PARAMETER, movieTitle));
+    public Flux<MovieDto> getMovies(MovieWebClient movieWebClient, String movieTitle) {
+        return getMovies(movieWebClient, URL, Map.of(SEARCH_PARAMETER, movieTitle));
     }
 
     @Override
@@ -72,8 +64,8 @@ public class OmdbapiMovieApiClient extends MovieApiClient<OmdbapiMovieApiClient.
     }
 
     @Override
-    public Mono<Collection<String>> getDirectors(Object id) {
-        return retrieve(URL, Map.of("i", id), MovieDetailsResponse.class)
+    public Mono<Collection<String>> getDirectors(MovieWebClient movieWebClient, Object id) {
+        return retrieve(movieWebClient, URL, Map.of("i", id), MovieDetailsResponse.class)
                 .map(response -> stream(response.director().split(DIRECTOR_DELIMITER)).toList());
     }
 }

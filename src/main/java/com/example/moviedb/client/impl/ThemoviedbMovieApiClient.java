@@ -1,12 +1,10 @@
 package com.example.moviedb.client.impl;
 
 import com.example.moviedb.client.MovieApiClient;
-import com.example.moviedb.configuration.ApiProperties;
 import com.example.moviedb.dto.MovieDto;
 import com.example.moviedb.service.MovieWebClient;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -17,8 +15,8 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
 
-@Component
-public class ThemoviedbMovieApiClient extends MovieApiClient<ThemoviedbMovieApiClient.MoviesResponse> {
+@Service
+public class ThemoviedbMovieApiClient implements MovieApiClient {
 
     private static final String API_ID = "themoviedb";
     private static final String URL = "/search/movie";
@@ -31,17 +29,17 @@ public class ThemoviedbMovieApiClient extends MovieApiClient<ThemoviedbMovieApiC
     public static class MoviesResponse extends ApiMoviesResponse<MoviesResponse.MovieItem> {
         public static class MovieItem extends MovieApiClient.ApiMoviesResponse.ApiMovieItem {
             @JsonProperty("title")
-            private String title;
+            public String title;
 
             @JsonProperty("release_date")
-            private String year;
+            public String year;
         }
 
         @JsonProperty("results")
-        private MovieItem[] items;
+        public MovieItem[] items;
 
         @JsonProperty("total_results")
-        private int totalResults;
+        public int totalResults;
     }
 
     public record Crew (
@@ -54,20 +52,14 @@ public class ThemoviedbMovieApiClient extends MovieApiClient<ThemoviedbMovieApiC
             Crew[] crews
     ) {}
 
-    public ThemoviedbMovieApiClient(
-            @Autowired ApiProperties apiProperties,
-            @Autowired MovieWebClient movieWebClient) {
-        super(apiProperties, movieWebClient);
-    }
-
     @Override
     public String getApiName() {
         return API_ID;
     }
 
     @Override
-    public Flux<MovieDto>  getMovies(String movieTitle) {
-        return getMovies(URL, Map.of(QUERY_PARAMETER, movieTitle, INCLUDE_ADULT_PARAMETER, true));
+    public Flux<MovieDto>  getMovies(MovieWebClient movieWebClient, String movieTitle) {
+        return getMovies(movieWebClient, URL, Map.of(QUERY_PARAMETER, movieTitle, INCLUDE_ADULT_PARAMETER, true));
     }
 
     @Override
@@ -82,8 +74,10 @@ public class ThemoviedbMovieApiClient extends MovieApiClient<ThemoviedbMovieApiC
     }
 
     @Override
-    public Mono<Collection<String>> getDirectors(Object id) {
-        return retrieve(format("%s/%s%s", MOVIE_URL, id, CREDITS_URL), emptyMap(), CreditsResponse.class)
+    public Mono<Collection<String>> getDirectors(MovieWebClient movieWebClient, Object id) {
+        return retrieve(
+                movieWebClient,
+                format("%s/%s%s", MOVIE_URL, id, CREDITS_URL), emptyMap(), CreditsResponse.class)
                 .flatMap(
                         response -> Mono.just(
                                 stream(response.crews)
